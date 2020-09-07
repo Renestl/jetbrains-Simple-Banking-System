@@ -10,13 +10,36 @@ def print_menu():
     print("0. Exit")
 
 
+def generate_checksum(acct_num):
+    nums = list(acct_num)
+
+    for index in range(len(nums)):
+        if index % 2 == 0:
+            nums[index] = int(nums[index]) * 2
+        else:
+            nums[index] = int(nums[index])
+
+    for index in range(len(nums)):
+        if int(nums[index]) > 9:
+            nums[index] = int(nums[index]) - 9
+        else:
+            nums[index] = int(nums[index])
+
+    nums_sum = sum(nums)
+
+    if nums_sum % 10 == 0:
+        return 0
+    else:
+        check = nums_sum + (10 - nums_sum % 10)
+        return check - nums_sum
+
+
 def create_account():
     temp_account_num = []
 
     mii = "4"  # digit 1
     iin = "00000"  # digits 2 - 6
-    account_id = [str(random.randint(0, 9)) for _ in range(10)]  # digit 7 to n - 1, with n being between 16 and 19
-    # checksum = "8"
+    account_id = [str(random.randint(0, 9)) for _ in range(9)]  # digit 7 to n - 1, with n being between 15 and 18
 
     temp_pin_num = [str(random.randint(0, 9)) for _ in range(4)]
     balance = "0"
@@ -24,7 +47,11 @@ def create_account():
     temp_account_num.append(mii)
     temp_account_num.append(iin)
     temp_account_num.append("".join(account_id))
-    # temp_account_num.append(checksum)
+
+    generate_account_num = "".join(temp_account_num)
+
+    checksum = generate_checksum(generate_account_num)  # digit 16-19 depending on card, verification digit
+    temp_account_num.append(str(checksum))
 
     account_num = "".join(temp_account_num)
     pin_num = "".join(temp_pin_num)
@@ -47,27 +74,59 @@ def customer_menu(account):
 
     customer_menu_choice = input()
 
-    while True:
-        if customer_menu_choice == "1":
-            print()
-            print(f"Balance: {account['balance']}")
-        elif customer_menu_choice == "2":
-            print()
-            print('You have successfully logged out!')
-            print_menu()
+    if customer_menu_choice == "1":
+        print()
+        print(f"Balance: {account['balance']}")
+    elif customer_menu_choice == "2":
+        print()
+        print('You have successfully logged out!')
+        print_menu()
+    else:
+        print()
+        print('Bye')
+        exit()
+
+
+def validate_checksum(card_num):
+    nums = list(card_num)
+
+    print(nums)
+    for index in range(len(nums) - 1):
+        if index % 2 == 0:
+            nums[index] = int(nums[index]) * 2
         else:
-            print()
-            print('Bye')
-            exit()
+            nums[index] = int(nums[index])
+
+    for index in range(len(nums) - 1):
+        if int(nums[index]) > 9:
+            nums[index] = int(nums[index]) - 9
+        else:
+            nums[index] = int(nums[index])
+
+    nums[-1] = int(nums[-1])
+    print(nums)
+    nums_sum = sum(nums)
+
+    if nums_sum % 10 == 0:
+        return True
+    else:
+        return False
 
 
 def verify_account(card, pin_num):
     if card in all_accounts:
         if pin_num == all_accounts[card]['pin']:
-            print()
-            print('You have successfully logged in!')
-            customer = all_accounts[card]
-            customer_menu(customer)
+            if validate_checksum(card):
+                print()
+                print('You have successfully logged in!')
+                customer = all_accounts[card]
+                customer_menu(customer)
+            else:
+                print()
+                print("Wrong card number or PIN!")
+                print()
+                print_menu()
+                log_in_account()
         else:
             print()
             print("Wrong card number or PIN!")
