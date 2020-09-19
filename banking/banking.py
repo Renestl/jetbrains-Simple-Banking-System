@@ -171,10 +171,13 @@ class BankingSystem:
             elif customer_menu_choice == "3":  # do transfer
                 print()
                 self.transfer_money()
+                print("Success!")
+                print()
             elif customer_menu_choice == "4":  # close account
                 print()
-                # self.close_account()
-                pass
+                self.close_account()
+                print('The account has been closed!')
+                print()
             elif customer_menu_choice == "5":  # log out
                 print('You have successfully logged out!')
                 print()
@@ -242,11 +245,12 @@ class BankingSystem:
                                 WHERE number = ?'''
                         cur.execute(sql, (transfer_balance, fetch_transfer_acct[1]))
                         update_database()
-
-                        db = cur.execute('SELECT * FROM card')
-                        print(db.fetchall())
             else:
                 print('Probably you made a mistake in the card number. Please try again!')
+
+    def close_account(self):
+        cur.execute('DELETE FROM card WHERE number = ?', (self.card_num,))
+        update_database()
 
 
 if __name__ == '__main__':
